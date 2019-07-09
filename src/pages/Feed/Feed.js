@@ -50,7 +50,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('URL')
+    fetch('http://localhost:8080/feed/posts')
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -106,12 +106,20 @@ class Feed extends Component {
       editLoading: true
     });
     // Set up data (with image!)
-    let url = 'URL';
+    let url = 'http://localhost:8080/feed/post';
+    let method = 'POST';
     if (this.state.editPost) {
       url = 'URL';
     }
 
-    fetch(url)
+    fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: postData.title,
+        content: postData.content
+      })
+    })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error('Creating or editing a post failed!');
@@ -119,6 +127,7 @@ class Feed extends Component {
         return res.json();
       })
       .then(resData => {
+        console.log(resData);
         const post = {
           _id: resData.post._id,
           title: resData.post.title,
@@ -200,26 +209,26 @@ class Feed extends Component {
           onCancelEdit={this.cancelEditHandler}
           onFinishEdit={this.finishEditHandler}
         />
-        <section className="feed__status">
+        <section className='feed__status'>
           <form onSubmit={this.statusUpdateHandler}>
             <Input
-              type="text"
-              placeholder="Your status"
-              control="input"
+              type='text'
+              placeholder='Your status'
+              control='input'
               onChange={this.statusInputChangeHandler}
               value={this.state.status}
             />
-            <Button mode="flat" type="submit">
+            <Button mode='flat' type='submit'>
               Update
             </Button>
           </form>
         </section>
-        <section className="feed__control">
-          <Button mode="raised" design="accent" onClick={this.newPostHandler}>
+        <section className='feed__control'>
+          <Button mode='raised' design='accent' onClick={this.newPostHandler}>
             New Post
           </Button>
         </section>
-        <section className="feed">
+        <section className='feed'>
           {this.state.postsLoading && (
             <div style={{ textAlign: 'center', marginTop: '2rem' }}>
               <Loader />
@@ -233,8 +242,7 @@ class Feed extends Component {
               onPrevious={this.loadPosts.bind(this, 'previous')}
               onNext={this.loadPosts.bind(this, 'next')}
               lastPage={Math.ceil(this.state.totalPosts / 2)}
-              currentPage={this.state.postPage}
-            >
+              currentPage={this.state.postPage}>
               {this.state.posts.map(post => (
                 <Post
                   key={post._id}
